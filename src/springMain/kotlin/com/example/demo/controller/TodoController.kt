@@ -2,7 +2,7 @@ package com.example.demo.controller
 
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuid4
-import com.example.demo.model.EventType
+import com.example.demo.enums.EventType
 import com.example.demo.model.Todo
 import com.example.demo.model.TodoEvent
 import com.example.demo.service.TodoService

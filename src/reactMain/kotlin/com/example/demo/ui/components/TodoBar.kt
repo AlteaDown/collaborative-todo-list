@@ -1,6 +1,6 @@
 package com.example.demo.ui.components
 
-import com.example.demo.model.TodoFilter
+import com.example.demo.enums.TodoFilter
 import com.example.demo.utils.pluralize
 import kotlinx.html.LI
 import kotlinx.html.js.onClickFunction
@@ -12,7 +12,7 @@ import react.dom.*
 
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-class TodoBar : RComponent<TodoBar.Props, RState>() {
+class TodoBar : RComponent<Props, RState>() {
 
   override fun RBuilder.render() {
     footer("footer") {
@@ -48,11 +48,7 @@ class TodoBar : RComponent<TodoBar.Props, RState>() {
   }
 
   private fun RDOMBuilder<LI>.filterItem(filter: TodoFilter, text: String) {
-    val classes = if (props.currentFilter == filter) {
-      "selected"
-    } else {
-      ""
-    }
+    val classes = if (props.currentFilter == filter) "selected" else ""
 
     a(classes = classes) {
       +text
@@ -60,14 +56,18 @@ class TodoBar : RComponent<TodoBar.Props, RState>() {
     }
   }
 
-  class Props(
-    var pendingCount: Int,
-    var anyCompleted: Boolean,
-    var clearCompleted: () -> Unit,
-    var updateFilter: (TodoFilter) -> Unit,
-    var currentFilter: TodoFilter
-  ) : RProps
+
 }
+
+@OptIn(ExperimentalJsExport::class)
+@JsExport
+class Props(
+  var pendingCount: Int,
+  var anyCompleted: Boolean,
+  var clearCompleted: () -> Unit,
+  var updateFilter: (TodoFilter) -> Unit,
+  var currentFilter: TodoFilter
+) : RProps
 
 fun RBuilder.todoBar(
   pendingCount: Int,

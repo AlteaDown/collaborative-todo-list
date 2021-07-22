@@ -1,6 +1,6 @@
 package com.example.demo.service
 
-import com.example.demo.model.EventType.*
+import com.example.demo.enums.EventType.*
 import com.example.demo.model.Todo
 import com.example.demo.model.TodoEvent
 import com.example.demo.repository.TodoRepository
@@ -13,10 +13,12 @@ class TodoService(private val todoRepository: TodoRepository) {
       UPDATE -> todoRepository.update(todoEvent.todo)
       REMOVE -> todoRepository.remove(todoEvent.todo)
       UPSERT -> when (check(todoEvent.todo)) {
-        CheckResult.NEW -> todoRepository.save(todoEvent.todo)
+        NEW -> todoRepository.save(todoEvent.todo)
         CHANGED -> todoRepository.update(todoEvent.todo)
         REMOVED -> todoRepository.remove(todoEvent.todo)
-        SAME -> TODO()
+        SAME -> {
+          /* Do Nothing */
+        }
       }
     }
   }
@@ -28,11 +30,12 @@ class TodoService(private val todoRepository: TodoRepository) {
         ?.let { existingTodo ->
           when {
             existingTodo == todo -> SAME
-            existingTodo.removed || todo.removed -> REMOVED
+            existingTodo.isDeleted() -> REMOVED
+            todo.isDeleted() -> REMOVED
             else -> CHANGED
           }
         }
-        ?: if (todo.removed) REMOVED else NEW
+        ?: if (todo.isDeleted()) REMOVED else NEW
   }
 
   enum class CheckResult {

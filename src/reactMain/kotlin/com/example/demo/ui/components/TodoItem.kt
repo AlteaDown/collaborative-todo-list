@@ -36,7 +36,7 @@ class TodoItem : RComponent<TodoItemProps, TodoItemState>() {
           props.updateTodo(props.todo.title, c)
         }
 
-        ref { it?.checked = props.todo.completed }
+        ref { it?.checked = props.todo.isCompleted }
       }
       label {
         +props.todo.title
@@ -69,7 +69,7 @@ class TodoItem : RComponent<TodoItemProps, TodoItemState>() {
 
   private fun finishEditing(title: String) {
     if (title.isNotBlank()) {
-      props.updateTodo(title, props.todo.completed)
+      props.updateTodo(title, props.todo.isCompleted)
     } else {
       props.removeTodo()
     }

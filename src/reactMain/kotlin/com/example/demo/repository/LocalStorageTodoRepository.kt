@@ -40,7 +40,7 @@ class LocalStorageTodoRepository : TodoRepository {
 
     return if (storedTodosJSON != null) {
       JSON.parse<Array<Todo>>(storedTodosJSON).map {
-        Todo(it.id, it.title, it.completed)
+        Todo(it.id, it.title, it.isCompleted)
       }.toList()
     } else {
       emptyList()

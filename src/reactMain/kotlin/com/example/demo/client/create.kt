@@ -9,7 +9,7 @@ import io.rsocket.kotlin.transport.ktor.client.RSocketSupport
 import io.rsocket.kotlin.transport.ktor.client.rSocket
 import kotlinx.browser.window
 
-actual suspend fun RSocketClient.Companion.create(): Client {
+actual suspend fun RSocketClient.Companion.create(): TodoSocketClient {
   val client = HttpClient {
     install(WebSockets)
     install(RSocketSupport) {

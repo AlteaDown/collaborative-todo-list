@@ -1,7 +1,7 @@
 package com.example.demo.ui.components
 
+import com.example.demo.enums.TodoFilter
 import com.example.demo.model.Todo
-import com.example.demo.model.TodoFilter
 import kotlinx.html.js.onDoubleClickFunction
 import react.*
 import react.dom.li
@@ -30,7 +30,7 @@ class TodoList : RComponent<TodoListProps, TodoListState>() {
         val isEditing = idx == state.editingIdx
 
         val classes = when {
-          todo.completed -> "completed"
+          todo.isCompleted -> "completed"
           isEditing -> "editing"
           else -> ""
         }
@@ -48,7 +48,7 @@ class TodoList : RComponent<TodoListProps, TodoListState>() {
             endEditing = ::endEditing,
             removeTodo = { props.removeTodo(todo) },
             updateTodo = { title, completed ->
-              props.updateTodo(todo.copy(title = title, completed = completed))
+              props.updateTodo(todo.copy(title = title, isCompleted = completed))
             }
           )
         }

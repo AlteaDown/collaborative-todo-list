@@ -20,7 +20,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 @OptIn(ExperimentalMetadataApi::class)
-class RSocketClient(val rsocket: RSocket) : Client {
+class RSocketClient(val rsocket: RSocket) : TodoSocketClient {
 
   override fun handleTodos(handler: (TodoEvent) -> Unit) {
     rsocket
@@ -36,32 +36,29 @@ class RSocketClient(val rsocket: RSocket) : Client {
   override fun exchange(todo: List<Todo>) {
     MainScope().launch {
       todo.forEach {
-        rsocket
-            .fireAndForget(buildPayload {
-              data(Json.encodeToString(it))
-              metadata(CompositeMetadata(RoutingMetadata("todos.upsert")))
-            })
+        rsocket.fireAndForget(buildPayload {
+          data(Json.encodeToString(it))
+          metadata(CompositeMetadata(RoutingMetadata("todos.upsert")))
+        })
       }
     }
   }
 
   override fun addTodo(todo: Todo) {
     MainScope().launch {
-      rsocket
-          .fireAndForget(buildPayload {
-            data(Json.encodeToString(todo))
-            metadata(CompositeMetadata(RoutingMetadata("todos.add")))
-          })
+      rsocket.fireAndForget(buildPayload {
+        data(Json.encodeToString(todo))
+        metadata(CompositeMetadata(RoutingMetadata("todos.add")))
+      })
     }
   }
 
   override fun updateTodo(todo: Todo) {
     MainScope().launch {
-      rsocket
-          .fireAndForget(buildPayload {
-            data(Json.encodeToString(todo))
-            metadata(CompositeMetadata(RoutingMetadata("todos.update")))
-          })
+      rsocket.fireAndForget(buildPayload {
+        data(Json.encodeToString(todo))
+        metadata(CompositeMetadata(RoutingMetadata("todos.update")))
+      })
     }
   }
 
@@ -77,4 +74,4 @@ class RSocketClient(val rsocket: RSocket) : Client {
   companion object
 }
 
-expect suspend fun RSocketClient.Companion.create(): Client
+expect suspend fun RSocketClient.Companion.create(): TodoSocketClient
