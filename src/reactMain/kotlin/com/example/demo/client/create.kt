@@ -10,25 +10,25 @@ import io.rsocket.kotlin.transport.ktor.client.rSocket
 import kotlinx.browser.window
 
 actual suspend fun RSocketClient.Companion.create(): Client {
-    val client: HttpClient = HttpClient {
-        install(WebSockets)
-        install(RSocketSupport) {
-            connector = RSocketConnector {
-                connectionConfig {
-                    payloadMimeType = PayloadMimeType(
-                        data = WellKnownMimeType.ApplicationJson,
-                        metadata = WellKnownMimeType.MessageRSocketCompositeMetadata
-                    )
-                }
-            }
+  val client = HttpClient {
+    install(WebSockets)
+    install(RSocketSupport) {
+      connector = RSocketConnector {
+        connectionConfig {
+          payloadMimeType = PayloadMimeType(
+            data = WellKnownMimeType.ApplicationJson,
+            metadata = WellKnownMimeType.MessageRSocketCompositeMetadata
+          )
         }
+      }
     }
+  }
 
-    val rSocket = client.rSocket(
-        host = window.location.hostname,
-        port = window.location.port.toInt(),
-        path = "/rsocket"
-    )
+  val rSocket = client.rSocket(
+    host = window.location.hostname,
+    port = window.location.port.toInt(),
+    path = "/rsocket"
+  )
 
-    return RSocketClient(rSocket)
+  return RSocketClient(rSocket)
 }

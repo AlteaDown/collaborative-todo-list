@@ -22,65 +22,59 @@ import kotlinx.serialization.json.Json
 @OptIn(ExperimentalMetadataApi::class)
 class RSocketClient(val rsocket: RSocket) : Client {
 
-    override fun handleTodos(handler: (TodoEvent) -> Unit) {
+  override fun handleTodos(handler: (TodoEvent) -> Unit) {
+    rsocket
+        .requestStream(buildPayload {
+          data(ByteReadPacket.Empty)
+          metadata(CompositeMetadata(RoutingMetadata("todos")))
+        })
+        .map { Json.decodeFromString<TodoEvent>(it.data.readText()) }
+        .onEach { handler(it) }
+        .launchIn(MainScope())
+  }
+
+  override fun exchange(todo: List<Todo>) {
+    MainScope().launch {
+      todo.forEach {
         rsocket
-            .requestStream(buildPayload {
-                data(ByteReadPacket.Empty)
-                metadata(CompositeMetadata(RoutingMetadata("todos")))
+            .fireAndForget(buildPayload {
+              data(Json.encodeToString(it))
+              metadata(CompositeMetadata(RoutingMetadata("todos.upsert")))
             })
-            .map {
-                val string = it.data.readText()
-                Json.decodeFromString<TodoEvent>(string)
-            }
-            .onEach {
-                handler(it)
-            }
-            .launchIn(MainScope())
+      }
     }
+  }
 
-    override fun exchange(todo: List<Todo>) {
-        MainScope().launch {
-            todo.forEach {
-                rsocket
-                    .fireAndForget(buildPayload {
-                        data(Json.encodeToString<Todo>(it))
-                        metadata(CompositeMetadata(RoutingMetadata("todos.upsert")))
-                    })
-            }
-        }
+  override fun addTodo(todo: Todo) {
+    MainScope().launch {
+      rsocket
+          .fireAndForget(buildPayload {
+            data(Json.encodeToString(todo))
+            metadata(CompositeMetadata(RoutingMetadata("todos.add")))
+          })
     }
+  }
 
-    override fun addTodo(todo: Todo) {
-        MainScope().launch {
-            rsocket
-                .fireAndForget(buildPayload {
-                    data(Json.encodeToString<Todo>(todo))
-                    metadata(CompositeMetadata(RoutingMetadata("todos.add")))
-                })
-        }
+  override fun updateTodo(todo: Todo) {
+    MainScope().launch {
+      rsocket
+          .fireAndForget(buildPayload {
+            data(Json.encodeToString(todo))
+            metadata(CompositeMetadata(RoutingMetadata("todos.update")))
+          })
     }
+  }
 
-    override fun updateTodo(todo: Todo) {
-        MainScope().launch {
-            rsocket
-                .fireAndForget(buildPayload {
-                    data(Json.encodeToString<Todo>(todo))
-                    metadata(CompositeMetadata(RoutingMetadata("todos.update")))
-                })
-        }
+  override fun removeTodo(todo: Todo) {
+    MainScope().launch {
+      rsocket.fireAndForget(buildPayload {
+        data(Json.encodeToString(todo))
+        metadata(CompositeMetadata(RoutingMetadata("todos.remove")))
+      })
     }
+  }
 
-    override fun removeTodo(todo: Todo) {
-        MainScope().launch {
-            rsocket
-                .fireAndForget(buildPayload {
-                    data(Json.encodeToString<Todo>(todo))
-                    metadata(CompositeMetadata(RoutingMetadata("todos.remove")))
-                })
-        }
-    }
-
-    companion object
+  companion object
 }
 
 expect suspend fun RSocketClient.Companion.create(): Client

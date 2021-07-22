@@ -9,17 +9,17 @@ import org.springframework.web.bind.annotation.ResponseBody
 @Controller
 class IndexController {
 
-    @GetMapping
-    @ResponseBody
-    fun index() = createHTML().html {
-        head {
-            title("ToDo List")
-        }
-        body {
-            div {
-                id = "root"
-            }
-            script(src = "/main.js") {}
-        }
+  @GetMapping
+  @ResponseBody
+  fun index() = createHTML().html {
+    head {
+      title("ToDo List")
     }
+    body {
+      div {
+        id = "root"
+      }
+      script(src = "/main.js") {}
+    }
+  }
 }

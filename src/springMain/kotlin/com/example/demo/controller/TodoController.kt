@@ -19,53 +19,53 @@ import java.util.concurrent.ConcurrentMap
 @Controller
 class TodoController(val todoService: TodoService) {
 
-    val clients: ConcurrentMap<Uuid, RSocketRequester> = ConcurrentHashMap()
-    val streams: ConcurrentMap<RSocketRequester, MutableSharedFlow<TodoEvent>> = ConcurrentHashMap()
+  val clients: ConcurrentMap<Uuid, RSocketRequester> = ConcurrentHashMap()
+  val streams: ConcurrentMap<RSocketRequester, MutableSharedFlow<TodoEvent>> = ConcurrentHashMap()
 
-    @ConnectMapping("")
-    fun handleCollaborator(rSocketRequester: RSocketRequester) {
-        val uuid4 = uuid4()
+  @ConnectMapping("")
+  fun handleCollaborator(rSocketRequester: RSocketRequester) {
+    val uuid4 = uuid4()
 
-        println("connected new client $uuid4")
+    println("connected new client $uuid4")
 
-        clients[uuid4] = rSocketRequester
-        streams[rSocketRequester] = MutableSharedFlow()
+    clients[uuid4] = rSocketRequester
+    streams[rSocketRequester] = MutableSharedFlow()
 
-        rSocketRequester.rsocket()!!
-            .onClose()
-            .subscribe {
-                clients.remove(uuid4)
-                streams.remove(rSocketRequester)
-            }
-    }
-
-    @MessageMapping("todos")
-    fun streamTodos(rSocketRequester: RSocketRequester): Flow<TodoEvent> =
-        todoService.listTodos().asFlow()
-            .map { TodoEvent(EventType.UPSERT, it) }
-            .onCompletion { emitAll(streams[rSocketRequester]!!) }
-
-
-    @MessageMapping("todos.{action}")
-    suspend fun handleTodoAction(
-        @Payload todo: Todo,
-        @DestinationVariable("action") action: String,
-        rSocketRequester: RSocketRequester
-    ) {
-        val evenType = when (action) {
-            "add" -> EventType.ADD
-            "update" -> EventType.UPDATE
-            "remove" -> EventType.REMOVE
-            "upsert" -> EventType.UPSERT
-            else -> throw Error("Unsupported action type $action")
+    rSocketRequester.rsocket()!!
+        .onClose()
+        .subscribe {
+          clients.remove(uuid4)
+          streams.remove(rSocketRequester)
         }
-        val todoEvent = TodoEvent(evenType, todo)
+  }
 
-        todoService.handleEvent(todoEvent)
-        streams
-            .filter { it.key != rSocketRequester }
-            .forEach {
-                it.value.emit(todoEvent)
-            }
+  @MessageMapping("todos")
+  fun streamTodos(rSocketRequester: RSocketRequester): Flow<TodoEvent> =
+      todoService.listTodos().asFlow()
+          .map { TodoEvent(EventType.UPSERT, it) }
+          .onCompletion { emitAll(streams[rSocketRequester]!!) }
+
+
+  @MessageMapping("todos.{action}")
+  suspend fun handleTodoAction(
+    @Payload todo: Todo,
+    @DestinationVariable("action") action: String,
+    rSocketRequester: RSocketRequester
+  ) {
+    val evenType = when (action) {
+      "add" -> EventType.ADD
+      "update" -> EventType.UPDATE
+      "remove" -> EventType.REMOVE
+      "upsert" -> EventType.UPSERT
+      else -> throw Error("Unsupported action type $action")
     }
+    val todoEvent = TodoEvent(evenType, todo)
+
+    todoService.handleEvent(todoEvent)
+    streams
+        .filter { it.key != rSocketRequester }
+        .forEach {
+          it.value.emit(todoEvent)
+        }
+  }
 }

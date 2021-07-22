@@ -8,6 +8,6 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class AppConfiguration {
 
-    @Bean
-    fun todoService(todoRepository: TodoRepository) = TodoService(todoRepository)
+  @Bean
+  fun todoService(todoRepository: TodoRepository) = TodoService(todoRepository)
 }

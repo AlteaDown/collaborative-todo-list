@@ -12,16 +12,14 @@ import org.springframework.messaging.rsocket.RSocketStrategies
 
 
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(
-    Json::class,
-)
+@ConditionalOnClass(Json::class)
 class KotlinxSerializationStrategyConfiguration {
-    @Bean
-    @Order(-1)
-    fun kotlinxSerializationRSocketStrategyCustomizer(): RSocketStrategiesCustomizer {
-        return RSocketStrategiesCustomizer { strategy: RSocketStrategies.Builder ->
-            strategy.decoder(KotlinSerializationJsonDecoder())
-            strategy.encoder(KotlinSerializationJsonEncoder())
-        }
+  @Bean
+  @Order(-1)
+  fun kotlinxSerializationRSocketStrategyCustomizer(): RSocketStrategiesCustomizer {
+    return RSocketStrategiesCustomizer { strategy: RSocketStrategies.Builder ->
+      strategy.decoder(KotlinSerializationJsonDecoder())
+      strategy.encoder(KotlinSerializationJsonEncoder())
     }
+  }
 }
