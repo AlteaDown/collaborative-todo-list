@@ -46,6 +46,16 @@ extra["snippetsDir"] = file("build/generated-snippets")
 extra["testcontainersVersion"] = "1.15.3"
 extra["testcontainersVersion"] = "1.15.3"
 
+val compilerArgs = listOf("-Xjsr305=strict", "-Xopt-in=kotlin.RequiresOptIn", "-Xopt-in=kotlin.js.ExperimentalJsExport")
+tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().configureEach {
+  kotlinOptions.freeCompilerArgs += compilerArgs
+}
+
+tasks.withType<KotlinCompile> {
+  kotlinOptions.jvmTarget = "1.8"
+  kotlinOptions.freeCompilerArgs += compilerArgs
+}
+
 kotlin {
   jvm("spring") {
     apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
@@ -55,12 +65,6 @@ kotlin {
     apply(plugin = "io.spring.dependency-management")
     // apply(plugin = "org.asciidoctor.convert")
 
-    tasks.withType<KotlinCompile> {
-      kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict", "-Xopt-in=kotlin.RequiresOptIn")
-        jvmTarget = "11"
-      }
-    }
     tasks.withType<Test> {
       useJUnitPlatform()
     }

@@ -63,6 +63,8 @@ class TodoList : RComponent<TodoListProps, TodoListState>() {
   }
 }
 
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 external interface TodoListProps : RProps {
   var removeTodo: (Todo) -> Unit
   var updateTodo: (Todo) -> Unit
